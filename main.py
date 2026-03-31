@@ -117,7 +117,7 @@ def load_dynamic_plugins(plugins_dir="plugins"):
     return dynamic_tools_list, dynamic_tools_mapping
 
 
-MODEL_ID = "gemini-3.1-flash-live-preview"
+MODEL_ID = "gemini-2.5-flash-native-audio-preview-12-2025"
 API_VERSION = "v1beta"
 AI_DATA_DIR = os.path.expanduser("~/.axinix/.ai")
 SETTINGS_FILE = os.path.join(AI_DATA_DIR, "settings.json")
