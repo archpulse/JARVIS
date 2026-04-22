@@ -54,6 +54,16 @@ FORBIDDEN_ATTR_CALLS = {
     "subprocess.Popen",
     "subprocess.call",
 }
+
+# Dangerous attribute names that should never be accessed via getattr on os/subprocess/etc.
+_DANGEROUS_ATTRS = frozenset({
+    "system", "popen", "remove", "unlink", "rmdir", "removedirs",
+    "rename", "replace", "chmod", "chown", "exec", "eval", "compile",
+    "__import__", "load_module", "load_source",
+})
+
+# Known "allow any" module names to watch
+_ALLOW_ANY_ATTRS = frozenset({"os", "subprocess", "shutil", "sys", "builtins"})
 CONFIRM_TTL_SECONDS = 180
 _CONFIRMED_PULLS = {}
 _PENDING_PLUGIN_CHOICES = []
@@ -61,16 +71,15 @@ _AI_REVIEW_CACHE = {}
 _http = requests.Session()
 _http.headers.update(
     {
-        "User-Agent": "AxinixAI-PluginInstaller/1.0",
+        "User-Agent": "JarvisAI-PluginInstaller/1.0",
         "Accept": "application/vnd.github+json",
     }
 )
 IGNORED_QUERY_TOKENS = {
     "plugin",
     "plugins",
-    "axinix",
+    "jarvis",
     "pycroft",
-    "axinix",
     "install",
     "installer",
     "github",
@@ -88,6 +97,44 @@ def _full_attr_name(node):
     return None
 
 
+def _check_getattr_obfuscation(node):
+    """Detect getattr(os, "sys" + "tem") style obfuscation.
+
+    Returns a list of findings (empty = clean).
+    """
+    findings = []
+    for child in ast.walk(node):
+        # Detect getattr(module, dangerous_attr) where module is in _ALLOW_ANY_ATTRS
+        if isinstance(child, ast.Call):
+            func = child.func
+            if (isinstance(func, ast.Name) and func.id == "getattr"
+                    and len(child.args) >= 2):
+                module_arg = child.args[0]
+                attr_arg = child.args[1]
+                # Check if module is one of the dangerous ones
+                if isinstance(module_arg, ast.Name):
+                    mod_name = module_arg.id
+                elif isinstance(module_arg, ast.Attribute):
+                    mod_name = _full_attr_name(module_arg) or ""
+                else:
+                    mod_name = ""
+                # Check if attr is a constant (string literal)
+                if isinstance(attr_arg, ast.Constant) and isinstance(attr_arg.value, str):
+                    attr_name = attr_arg.value
+                    if mod_name in _ALLOW_ANY_ATTRS and attr_name in _DANGEROUS_ATTRS:
+                        findings.append(
+                            f"getattr({mod_name}, '{attr_name}') — "
+                            "possible dynamic command execution via getattr"
+                        )
+                # Also flag string concatenation: "sys" + "tem"
+                elif isinstance(attr_arg, ast.BinOp) and isinstance(attr_arg.op, ast.Add):
+                    findings.append(
+                        f"getattr({mod_name}, <string concat>) — "
+                        "possible dynamic attribute access via concatenation"
+                    )
+    return findings
+
+
 def static_security_scan(code: str):
     if len(code) > MAX_PLUGIN_SIZE:
         return False, [f"File is too large (>{MAX_PLUGIN_SIZE} bytes)."]
@@ -98,6 +145,11 @@ def static_security_scan(code: str):
         return False, [f"Syntax error: {exc}"]
 
     findings = []
+
+    # 1. Check for getattr obfuscation on dangerous modules
+    getattr_findings = _check_getattr_obfuscation(tree)
+    findings.extend(getattr_findings)
+
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
@@ -204,7 +256,7 @@ def _ai_security_review(code: str):
         f"Code:\n```python\n{code}\n```"
     )
 
-    client = genai.Client(api_key=api_key, http_options={"api_version": "v1beta"})
+    client = genai.Client(api_key=api_key, http_options={"api_version": "v1alpha"})
     text = ""
     used_model = ""
     last_error = None
@@ -432,15 +484,15 @@ def search_github_plugins(query: str):
         search_urls = [
             (
                 "https://api.github.com/search/repositories"
-                f"?q={core_query}+topic:axinix-plugin+in:name,description&sort=stars&order=desc&per_page=8"
+                f"?q={core_query}+topic:jarvis-plugin+in:name,description&sort=stars&order=desc&per_page=8"
             ),
             (
                 "https://api.github.com/search/repositories"
-                f"?q={core_query}+axinix+in:name,description&sort=updated&order=desc&per_page=8"
+                f"?q={core_query}+jarvis+in:name,description&sort=updated&order=desc&per_page=8"
             ),
             (
                 "https://api.github.com/search/repositories"
-                "?q=topic:axinix-plugin&sort=updated&order=desc&per_page=20"
+                "?q=topic:jarvis-plugin&sort=updated&order=desc&per_page=20"
             ),
         ]
 

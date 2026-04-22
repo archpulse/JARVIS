@@ -1,43 +1,67 @@
-# JARVIS AI 🤖
-🚀 **JARVIS** — An autonomous AI voice assistant powered by Google Gemini. Featuring a microkernel architecture that discovers, security-scans, and installs GitHub plugins on demand.
+# J.A.R.V.I.S. (Just A Rather Very Intelligent System)
+
+🚀 **The ultimate AI companion for Arch Linux.** Powered by Google Gemini, J.A.R.V.I.S. is a sophisticated voice assistant designed to make your Linux experience feel like science fiction.
 
 ![Python](https://img.shields.io/badge/python-3.10+-blue.svg)
 ![Gemini](https://img.shields.io/badge/AI-Google%20Gemini-orange)
-![OS](https://img.shields.io/badge/OS-Arch%20Linux-blueviolet)
+![Arch Linux](https://img.shields.io/badge/OS-Arch%20Linux-blue)
 
-JARVIS is a Linux-native assistant optimized for **Arch Linux** (Gnome/KDE). It executes local commands, stores long-term memory, and expands its capabilities by learning new plugins.
+## 🎩 Personality & Experience
+J.A.R.V.I.S. operates with refined British politeness, dry wit, and proactive intelligence. He doesn't just wait for commands—he monitors your system, manages your workstation, and assists with everything from coding to connectivity.
 
-## 🧠 Core Architecture
-- **Microkernel Layout:** `main.py` acts as the engine (audio loop, Gemini session, UI queues). All logic is decoupled into plugins.
-- **Adaptive Workflow:** Ask *"Jarvis, install a crypto tracker,"* and it will search GitHub for `axinix-plugin` tags, show metadata, and wait for your confirmation.
-- **Static Security Scan:** Before saving any plugin to `plugins/`, JARVIS scans the code for risky calls like `eval` or unchecked `os.system`.
-- **Long-term Memory:** Uses SQLite to store facts about you and your preferences.
+## 🛠️ Built-in Arch Linux "Cheat Codes"
+J.A.R.V.I.S. comes pre-equipped with specialized plugins to manage your system natively:
 
-## 🛠 Setup & Launch
-Optimized for **Arch Linux + Gnome on X11**. Uses the `uv` package manager for maximum speed.
+- **📦 Package Manager**: Search, install, and update packages via `yay`, `paru`, or `pacman`.
+- **📖 Arch Wiki Oracle**: Instant answers and documentation fetched directly from the official Arch Wiki.
+- **🏥 System Health**: Proactive monitoring of `systemd` failed services, disk usage, and unmerged `.pacnew` files.
+- **📡 Connectivity**: Voice-controlled WiFi management (`nmcli`) and Bluetooth control (`bluetoothctl`).
+- **🚀 System Optimization**: Fastfetch summaries and one-command system updates.
 
-### Quick Start:
-1. **Clone the repo:**
+## 🧩 Core Capabilities
+- **Web Research**: Intelligent internet search using DuckDuckGo and Wikipedia.
+- **Vision**: Analyzes your screen content for debugging or general assistance (via `capture_screen`).
+- **Autonomous Coding**: Can generate and install its own plugins using the `self_coder` module.
+- **Memory**: Remembers facts about you and your preferences across sessions.
+- **System Control**: Native app launching, media controls, volume management, and custom modes (Gaming, Dinner, etc.).
+
+## 🚀 Installation
+
+1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/archpulse/JARVIS.git](https://github.com/archpulse/JARVIS.git)
-   cd JARVIS
-Run with uv (Recommended):
+   git clone https://github.com/archpulse/jarvis.git
+   cd jarvis
+   ```
 
-Bash
-QT_QPA_PLATFORM=xcb uv run main.py
-Note: QT_QPA_PLATFORM=xcb ensures Qt stability on X11 sessions.
+2. **Setup Virtual Environment:**
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate
+   pip install -r requirements.txt
+   ```
 
-Configuration:
-On the first launch, the PyQt Wizard will guide you through API key entry (Google AI Studio) and basic localization settings.
+3. **External Dependencies:**
+   Ensure you have the following installed for full functionality:
+   - `portaudio` (for mic input)
+   - `playerctl` (for media control)
+   - `fastfetch` (for system summary)
+   - `networkmanager` (for WiFi control)
+   - `bluez-utils` (for Bluetooth control)
 
-🧩 Plugin System
-plugins/00_core_memory.py — Fact storage and retrieval.
+4. **Run:**
+   ```bash
+   python main.py
+   ```
+   *Follow the Setup Wizard on first launch to configure your Gemini API Key.*
 
-plugins/01_core_system.py — Native Linux control (volume, apps, system stats via playerctl/wpctl).
+## 🧱 Project Structure
+- `main.py`: The central intelligence engine (Voice, AI, GUI).
+- `plugins/`: A directory of specialized skills.
+- `utils.py`: System-level helper functions.
+- `translations.py`: Multi-language support and character dialogue.
 
-plugins/02_core_web.py — DuckDuckGo search, Wikipedia, and weather.
+## 🤝 Contributing
+J.A.R.V.I.S. is designed to be modular. You can add new capabilities by simply dropping a new Python script into the `plugins/` directory.
 
-🎙 Voice Interaction
-Powered by local openwakeword. Wake phrase: "Hey Jarvis".
-
-Built by a Linux user for Linux users. Running on Arch, thinking with Gemini.
+---
+*Created with British elegance and Arch Linux efficiency.*

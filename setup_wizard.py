@@ -14,14 +14,14 @@ from PyQt6.QtWidgets import (
     QWizardPage,
 )
 
-AI_DATA_DIR = os.path.expanduser("~/.axinix/.ai")
+AI_DATA_DIR = os.path.expanduser("~/.jarvis/.ai")
 ENV_FILE = os.path.join(AI_DATA_DIR, ".env")
 SETTINGS_FILE = os.path.join(AI_DATA_DIR, "settings.json")
 PLUGIN_DAILY_LIMIT = 25
 
 WIZARD_TRANSLATIONS = {
     "EN": {
-        "page1_title": "Hello! I am Axinix AI",
+        "page1_title": "Hello! I am J.A.R.V.I.S.",
         "page1_desc": "Welcome to the autonomous AI ecosystem. I’m here to help you automate your workflow and enhance your Linux experience. Let’s start by customizing your setup.",
         "lang_lbl": "Language:",
         "theme_lbl": "Theme:",
@@ -33,14 +33,14 @@ WIZARD_TRANSLATIONS = {
         "page4_title": "Expanding Capabilities",
         "page4_desc": f"You can ask me to search GitHub plugins. I first compare metadata and README previews, then ask for your confirmation before download. Only confirmed code that passes static checks is installed into plugins. For safety, plugin installs and AI security reviews are limited to {PLUGIN_DAILY_LIMIT} per day.",
         "page5_title": "Launching...",
-        "page5_desc": 'Configuration complete! Axinix AI is now ready to serve on your system. If you have questions, check out our GitHub repository. Click "Finish" to launch the assistant!',
+        "page5_desc": 'Configuration complete! J.A.R.V.I.S. is now ready to serve on your system. If you have questions, check out our GitHub repository. Click "Finish" to launch the assistant!',
         "page_city_title": "Your Location",
         "page_city_desc": "Please enter your default city. I use this to know your current time, adjust my greeting tone (morning, day, evening), and fetch accurate local weather and news.",
         "city_lbl": "City:",
         "city_placeholder": "e.g., Los Angeles, Kyiv, Seoul",
     },
     "RU": {
-        "page1_title": "Привет! Я Axinix AI",
+        "page1_title": "Привет! Я J.A.R.V.I.S.",
         "page1_desc": "Добро пожаловать в автономную ИИ-экосистему. Я здесь, чтобы помочь автоматизировать ваш рабочий процесс и улучшить опыт работы в Linux. Давайте начнем с настройки.",
         "lang_lbl": "Язык:",
         "theme_lbl": "Тема:",
@@ -52,14 +52,14 @@ WIZARD_TRANSLATIONS = {
         "page4_title": "Расширение возможностей",
         "page4_desc": f"Вы можете попросить меня искать плагины на GitHub. Сначала я сравниваю метаданные и превью README, затем запрашиваю явное подтверждение перед скачиванием. В plugins устанавливается только подтвержденный код, прошедший статическую проверку. Для безопасности действует лимит: не более {PLUGIN_DAILY_LIMIT} установок и AI-проверок плагинов в день.",
         "page5_title": "Запуск...",
-        "page5_desc": 'Настройка завершена! Axinix AI готов к работе. Если у вас есть вопросы, загляните в наш репозиторий на GitHub. Нажмите "Готово", чтобы запустить ассистента!',
+        "page5_desc": 'Настройка завершена! J.A.R.V.I.S. готов к работе. Если у вас есть вопросы, загляните в наш репозиторий на GitHub. Нажмите "Готово", чтобы запустить ассистента!',
         "page_city_title": "Ваша локация",
         "page_city_desc": "Пожалуйста, введите ваш город по умолчанию. Это нужно, чтобы я знал ваше местное время, подстраивал тон приветствия (утро, день, вечер) и давал точные прогнозы погоды и новости.",
         "city_lbl": "Город:",
         "city_placeholder": "например, Лос-Анджелес, Киев, Seoul",
     },
     "UA": {
-        "page1_title": "Привіт! Я Axinix AI",
+        "page1_title": "Привіт! Я J.A.R.V.I.S.",
         "page1_desc": "Ласкаво просимо до автономної ШІ-екосистеми. Я тут, щоб допомогти автоматизувати ваш робочий процес і покращити досвід роботи в Linux. Почнімо з налаштування.",
         "lang_lbl": "Мова:",
         "theme_lbl": "Тема:",
@@ -71,14 +71,14 @@ WIZARD_TRANSLATIONS = {
         "page4_title": "Розширення можливостей",
         "page4_desc": f"Ви можете попросити мене шукати плагіни на GitHub. Спочатку я порівнюю метадані та прев'ю README, потім запитую явне підтвердження перед завантаженням. У plugins встановлюється лише підтверджений код, що пройшов статичну перевірку. Для безпеки діє ліміт: не більше {PLUGIN_DAILY_LIMIT} встановлень і AI-перевірок плагінів на день.",
         "page5_title": "Запуск...",
-        "page5_desc": 'Налаштування завершено! Axinix AI готовий до роботи. Якщо у вас є питання, загляньте в наш репозиторий на GitHub. Натисніть "Готово", щоб запустити асистента!',
+        "page5_desc": 'Налаштування завершено! J.A.R.V.I.S. готовий до роботи. Якщо у вас є питання, загляньте в наш репозиторий на GitHub. Натисніть "Готово", щоб запустити асистента!',
         "page_city_title": "Ваша локація",
         "page_city_desc": "Будь ласка, введіть ваше місто за замовчуванням. Це потрібно, щоб я знав ваш місцевий час, підлаштовував тон вітання (ранок, день, вечір) і давав точні прогнози погоди та новини.",
         "city_lbl": "Місто:",
         "city_placeholder": "наприклад, Лос-Анджелес, Київ, Seoul",
     },
     "DE": {
-        "page1_title": "Hallo! Ich bin Axinix AI",
+        "page1_title": "Hallo! Ich bin J.A.R.V.I.S.",
         "page1_desc": "Willkommen im autonomen KI-Ökosystem. Ich bin hier, um Ihren Workflow zu automatisieren. Beginnen wir mit der Einrichtung.",
         "lang_lbl": "Sprache:",
         "theme_lbl": "Thema:",
@@ -90,14 +90,14 @@ WIZARD_TRANSLATIONS = {
         "page4_title": "Funktionen erweitern",
         "page4_desc": f"Sie koennen mich bitten, Plugins auf GitHub zu suchen. Ich lade den Code, pruefe ihn statisch und installiere nur Dateien automatisch, die die Sicherheitsrichtlinie bestehen. Aus Sicherheitsgruenden sind Plugin-Installationen und KI-Pruefungen auf {PLUGIN_DAILY_LIMIT} pro Tag begrenzt.",
         "page5_title": "Starten...",
-        "page5_desc": 'Einrichtung abgeschlossen! Axinix AI ist bereit. Klicken Sie auf "Finish".',
+        "page5_desc": 'Einrichtung abgeschlossen! J.A.R.V.I.S. ist bereit. Klicken Sie auf "Finish".',
         "page_city_title": "Ihr Standort",
         "page_city_desc": "Bitte geben Sie Ihre Standardstadt ein. Ich verwende dies für Wetter, Nachrichten und die Anpassung meiner Begrüßung an Ihre Tageszeit.",
         "city_lbl": "Stadt:",
         "city_placeholder": "z. B. Los Angeles, Kyjiw, Seoul",
     },
     "ES": {
-        "page1_title": "¡Hola! Soy Axinix AI",
+        "page1_title": "¡Hola! Soy J.A.R.V.I.S.",
         "page1_desc": "Bienvenido al ecosistema de IA autónoma. Estoy aquí para ayudar a automatizar su flujo de trabajo. Comencemos con la configuración.",
         "lang_lbl": "Idioma:",
         "theme_lbl": "Tema:",
@@ -109,14 +109,14 @@ WIZARD_TRANSLATIONS = {
         "page4_title": "Ampliando capacidades",
         "page4_desc": f"Puede pedirme buscar plugins en GitHub. Descargo el codigo, aplico verificacion estatica estricta e instalo automaticamente solo archivos que pasen la politica de seguridad. Por seguridad, las instalaciones y revisiones AI de plugins estan limitadas a {PLUGIN_DAILY_LIMIT} por dia.",
         "page5_title": "Lanzamiento...",
-        "page5_desc": '¡Configuración completa! Axinix AI está listo. Haga clic en "Finish".',
+        "page5_desc": '¡Configuración completa! J.A.R.V.I.S. está listo. Haga clic en "Finish".',
         "page_city_title": "Su ubicación",
         "page_city_desc": "Ingrese su ciudad predeterminada. Utilizo esto para conocer su hora actual, ajustar mi tono de saludo y obtener el clima y las noticias locales precisas.",
         "city_lbl": "Ciudad:",
         "city_placeholder": "p. ej., Los Angeles, Kyiv, Seoul",
     },
     "FR": {
-        "page1_title": "Bonjour ! Je suis Axinix AI",
+        "page1_title": "Bonjour ! Je suis J.A.R.V.I.S.",
         "page1_desc": "Bienvenue dans l'écosystème d'IA autonome. Je suis là pour automatiser votre flux de travail. Commençons la configuration.",
         "lang_lbl": "Langue :",
         "theme_lbl": "Thème :",
@@ -128,14 +128,14 @@ WIZARD_TRANSLATIONS = {
         "page4_title": "Extension des capacités",
         "page4_desc": f"Vous pouvez me demander de chercher des plugins sur GitHub. Je telecharge le code, j'applique une verification statique stricte et je n'installe automatiquement que les fichiers qui passent la politique de securite. Pour la securite, les installations et verifications IA de plugins sont limitees a {PLUGIN_DAILY_LIMIT} par jour.",
         "page5_title": "Lancement...",
-        "page5_desc": 'Configuration terminée ! Axinix AI est prêt. Cliquez sur "Finish".',
+        "page5_desc": 'Configuration terminée ! J.A.R.V.I.S. est prêt. Cliquez sur "Finish".',
         "page_city_title": "Votre emplacement",
         "page_city_desc": "Veuillez entrer votre ville par défaut. J'utilise cela pour la météo, les actualités et pour adapter mes salutations à votre heure locale.",
         "city_lbl": "Ville :",
         "city_placeholder": "par ex., Los Angeles, Kyiv, Seoul",
     },
     "ZH": {
-        "page1_title": "你好！我是 Axinix AI",
+        "page1_title": "你好！我是 J.A.R.V.I.S.",
         "page1_desc": "欢迎来到自治人工智能生态系统。我在这里帮助自动化您的工作流程。让我们开始设置吧。",
         "lang_lbl": "语言：",
         "theme_lbl": "主题：",
@@ -147,14 +147,14 @@ WIZARD_TRANSLATIONS = {
         "page4_title": "扩展能力",
         "page4_desc": f"你可以让我在 GitHub 上搜索插件。我会下载代码并执行严格静态检查，只会自动安装通过安全策略的文件。出于安全考虑，插件安装和 AI 安全检查每天最多 {PLUGIN_DAILY_LIMIT} 次。",
         "page5_title": "启动...",
-        "page5_desc": "设置完成！Axinix AI 已准备就绪。点击“Finish”。",
+        "page5_desc": "设置完成！J.A.R.V.I.S. 已准备就绪。点击“Finish”。",
         "page_city_title": "您的位置",
         "page_city_desc": "请输入您的默认城市。我用它来了解您的当前时间，调整我的问候语气（早晨、白天、晚上），并获取准确的当地天气和新闻。",
         "city_lbl": "城市：",
         "city_placeholder": "例如：洛杉矶，基辅，Seoul",
     },
     "JA": {
-        "page1_title": "こんにちは！Axinix AI です",
+        "page1_title": "こんにちは！J.A.R.V.I.S. です",
         "page1_desc": "自律型AIエコシステムへようこそ。ワークフローの自動化をお手伝いします。セットアップを始めましょう。",
         "lang_lbl": "言語:",
         "theme_lbl": "テーマ:",
@@ -166,14 +166,14 @@ WIZARD_TRANSLATIONS = {
         "page4_title": "機能の拡張",
         "page4_desc": f"GitHubのプラグイン検索を依頼できます。コードを取得して厳格な静的チェックを行い、安全ポリシーを通過したファイルのみ自動インストールします。安全のため、プラグインのインストールとAIセキュリティ確認は1日{PLUGIN_DAILY_LIMIT}回までです。",
         "page5_title": "起動中...",
-        "page5_desc": "セットアップ完了！Axinix AI の準備ができました。「Finish」をクリックしてください。",
+        "page5_desc": "セットアップ完了！J.A.R.V.I.S. の準備ができました。「Finish」をクリックしてください。",
         "page_city_title": "あなたの場所",
         "page_city_desc": "デフォルトの都市を入力してください。これは、あなたの現在時刻を知り、挨拶のトーン（朝、昼、夜）を調整し、正確な現地の天気やニュースを取得するために使用されます。",
         "city_lbl": "都市:",
         "city_placeholder": "例：ロサンゼルス、キエフ、Seoul",
     },
     "KO": {
-        "page1_title": "안녕하세요! Axinix AI입니다",
+        "page1_title": "안녕하세요! J.A.R.V.I.S.입니다",
         "page1_desc": "자율 AI 생태계에 오신 것을 환영합니다. 워크플로우 자동화를 돕겠습니다. 설정을 시작하겠습니다.",
         "lang_lbl": "언어:",
         "theme_lbl": "테마:",
@@ -185,14 +185,14 @@ WIZARD_TRANSLATIONS = {
         "page4_title": "기능 확장",
         "page4_desc": f"GitHub plugin geomsageul butakhal su isseoyo. Kodeureul daunbatgo eomgyeokhan jeongjeok geomsa hu boan jeongchaegeul tonggwahan pailman jadongeuro seolchihamnida. Boaneul wihae plugin seolchi mit AI geomsa neun haru choedae {PLUGIN_DAILY_LIMIT}hoimnida.",
         "page5_title": "시작...",
-        "page5_desc": '설정 완료! Axinix AI이 준비되었습니다. "Finish"를 클릭하세요.',
+        "page5_desc": '설정 완료! J.A.R.V.I.S.이 준비되었습니다. "Finish"를 클릭하세요.',
         "page_city_title": "위치",
         "page_city_desc": "기본 도시를 입력하세요. 저는 이것을 사용하여 현재 시간을 알고, 인사 톤(아침, 낮, 저녁)을 조정하고, 정확한 현지 날씨와 뉴스를 가져옵니다.",
         "city_lbl": "도시:",
         "city_placeholder": "예: 로스앤젤레스, 키예프, Seoul",
     },
     "PT": {
-        "page1_title": "Olá! Eu sou Axinix AI",
+        "page1_title": "Olá! Eu sou J.A.R.V.I.S.",
         "page1_desc": "Bem-vindo ao ecossistema de IA autônoma. Estou aqui para ajudar a automatizar seu fluxo de trabalho. Vamos começar a configuração.",
         "lang_lbl": "Idioma:",
         "theme_lbl": "Tema:",
@@ -204,14 +204,14 @@ WIZARD_TRANSLATIONS = {
         "page4_title": "Expandindo Recursos",
         "page4_desc": f"Voce pode pedir busca de plugins no GitHub. Eu baixo o codigo, aplico verificacao estatica rigorosa e instalo automaticamente apenas arquivos que passam na politica de seguranca. Por seguranca, instalacoes e revisoes de plugins por IA sao limitadas a {PLUGIN_DAILY_LIMIT} por dia.",
         "page5_title": "Iniciando...",
-        "page5_desc": 'Configuração concluída! Axinix AI está pronto. Clique em "Finish".',
+        "page5_desc": 'Configuração concluída! J.A.R.V.I.S. está pronto. Clique em "Finish".',
         "page_city_title": "Sua localização",
         "page_city_desc": "Por favor, insira sua cidade padrão. Eu uso isso para saber sua hora atual, ajustar meu tom de saudação e buscar previsões do tempo e notícias locais precisas.",
         "city_lbl": "Cidade:",
         "city_placeholder": "ex., Los Angeles, Kiev, Seoul",
     },
     "IT": {
-        "page1_title": "Ciao! Sono Axinix AI",
+        "page1_title": "Ciao! Sono J.A.R.V.I.S.",
         "page1_desc": "Benvenuto nell'ecosistema di intelligenza artificiale autonoma. Sono qui per automatizzare il tuo flusso di lavoro. Iniziamo la configurazione.",
         "lang_lbl": "Lingua:",
         "theme_lbl": "Tema:",
@@ -223,7 +223,7 @@ WIZARD_TRANSLATIONS = {
         "page4_title": "Espansione delle capacità",
         "page4_desc": f"Puoi chiedermi di cercare plugin su GitHub. Scarico il codice, eseguo controlli statici rigorosi e installo automaticamente solo i file che superano la politica di sicurezza. Per sicurezza, installazioni e revisioni AI dei plugin sono limitate a {PLUGIN_DAILY_LIMIT} al giorno.",
         "page5_title": "Avvio...",
-        "page5_desc": 'Configurazione completata! Axinix AI è pronto. Clicca su "Finish".',
+        "page5_desc": 'Configurazione completata! J.A.R.V.I.S. è pronto. Clicca su "Finish".',
         "page_city_title": "La tua posizione",
         "page_city_desc": "Inserisci la tua città predefinita. Lo uso per il meteo, le notizie e per adattare il mio saluto alla tua ora locale.",
         "city_lbl": "Città:",
@@ -236,7 +236,7 @@ class WelcomePage(QWizardPage):
     def __init__(self, wizard):
         super().__init__()
         self.wizard = wizard
-        self.setTitle("Hello! I am Axinix AI")
+        self.setTitle("Hello! I am J.A.R.V.I.S.")
         layout = QVBoxLayout()
 
         self.label = QLabel(
@@ -387,7 +387,7 @@ class AllSetPage(QWizardPage):
         layout = QVBoxLayout()
 
         self.label = QLabel(
-            'Configuration complete! Axinix AI is now ready to serve on your system. If you have questions, check out our GitHub repository. Click "Finish" to launch the assistant!'
+            'Configuration complete! J.A.R.V.I.S. is now ready to serve on your system. If you have questions, check out our GitHub repository. Click "Finish" to launch the assistant!'
         )
         self.label.setWordWrap(True)
         self.label.setMargin(10)
@@ -403,7 +403,7 @@ class AllSetPage(QWizardPage):
 class SetupWizard(QWizard):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Axinix AI Setup")
+        self.setWindowTitle("J.A.R.V.I.S. Setup")
 
         # Apply qdarktheme immediately to this window
 

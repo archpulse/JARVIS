@@ -10,4 +10,5 @@ pyqtdarktheme==0.1.7
 requests==2.32.5
 PyAutoGUI==0.9.54
 pyscreenshot==3.1
+mss
 openwakeword==0.4.0
