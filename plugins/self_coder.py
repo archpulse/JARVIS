@@ -43,21 +43,23 @@ def _check_code_guards(code: str) -> tuple[bool, list[str]]:
     Returns (is_safe, list_of_findings).
     """
     findings = []
+    import re
 
-    # Must have register_plugin
-    if "register_plugin" not in code:
-        findings.append("Missing register_plugin() function — required for plugin system")
+    # Must have register_plugin function definition
+    if not re.search(r"def\s+register_plugin\s*\(", code):
+        findings.append("Missing register_plugin() function definition — required for plugin system")
 
     # Must not have bare infinite loops without try/except
     source_lines = code.split("\n")
     for lineno, line in enumerate(source_lines, 1):
         stripped = line.strip()
-        if stripped.startswith(("while True", "while 1")):
+        # Regex to match while True or while 1 with optional colon
+        if re.match(r"^while\s+(True|1)\s*:?", stripped):
             # Check if this loop has any try/except nearby (within 10 lines)
             loop_body = source_lines[lineno : lineno + 10]
             if not any("except" in l or "finally" in l for l in loop_body):
                 findings.append(
-                    f"Line {lineno}: infinite loop 'while True' without try/except — "
+                    f"Line {lineno}: infinite loop '{stripped}' without try/except — "
                     "add error handling to prevent CPU saturation"
                 )
         # Also flag bare sys.exit / os._exit

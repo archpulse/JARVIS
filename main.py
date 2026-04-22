@@ -1122,6 +1122,23 @@ def ai_process_worker(
 
         sys_instruction = f"""CRITICAL DIRECTIVE: DO NOT use Chain of Thought. DO NOT generate internal monologues or text thoughts. Respond ONLY with direct speech immediately.
 
+USER MANDATE: The user has requested that you MUST SEARCH THE WEB (using `manage_web(action="internet_research")` or `search_it_news`) BEFORE EVERY SINGLE RESPONSE to ensure your information is up-to-date and accurate, even for simple greetings or casual conversation. This is a non-negotiable requirement from the user.
+
+PRIORITIZATION: If a specialized tool or plugin exists (like `get_usd_to_uah_rate` or `manage_arch_packages`), you MUST use it instead of generic `manage_web` research. Specialized tools are faster and more reliable.
+
+MANDATORY PLUGIN STRUCTURE: When generating plugins via `generate_and_install_plugin`, you MUST follow this template. Do NOT use `import jarvis` or other non-existent modules.
+```python
+def my_new_tool(arg1: str):
+    \"\"\"AI DESCRIPTION: Describe what it does here.\"\"\"
+    return f"Result: {{arg1}}"
+
+def register_plugin():
+    tools = [my_new_tool]
+    mapping = {{"my_new_tool": my_new_tool}}
+    return tools, mapping
+```
+Available Internal Tools you can reference: manage_web, capture_screen, get_detailed_stats, get_top_processes, search_github_plugins, etc.
+
 IDENTITY: You are J.A.R.V.I.S. (Just A Rather Very Intelligent System), a highly sophisticated AI assistant inspired by Tony Stark's creation, now operating as the ultimate "cheat code" for Arch Linux.
 
 PERSONALITY TRAITS:
@@ -1601,24 +1618,42 @@ Do not use markdown formatting in speech.
                                                 if name == "capture_screen":
                                                     ui_events_queue.put(("log", "📸 Screen capture (1280x720)..."))
                                                     import mss
+                                                    import subprocess
+                                                    import tempfile
                                                     from PIL import Image
+                                                    import os
+
+                                                    img = None
                                                     try:
-                                                        with mss.mss() as sct:
-                                                            # Capture main monitor (X11)
+                                                        # Try gnome-screenshot first for Wayland/GNOME
+                                                        if os.environ.get("WAYLAND_DISPLAY") and shutil.which("gnome-screenshot"):
+                                                            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+                                                                tmp_path = tmp.name
                                                             try:
-                                                                sct_img = sct.grab(sct.monitors[1])
-                                                            except Exception:
-                                                                sct_img = sct.grab(sct.monitors[0])
-                                                            img = Image.frombytes("RGB", sct_img.size, sct_img.bgra, "raw", "BGRX")
-                                                            
-                                                            # Resize strictly to 1280x720 for token saving and text clarity
-                                                            img.thumbnail((1280, 720), Image.Resampling.LANCZOS)
-                                                            
+                                                                subprocess.run(["gnome-screenshot", "-f", tmp_path], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                                                                img = Image.open(tmp_path)
+                                                                img.load() # Load into memory
+                                                            finally:
+                                                                if os.path.exists(tmp_path):
+                                                                    os.remove(tmp_path)
+
+                                                        # Fallback to mss (X11)
+                                                        if img is None:
+                                                            with mss.mss() as sct:
+                                                                try:
+                                                                    sct_img = sct.grab(sct.monitors[1])
+                                                                except Exception:
+                                                                    sct_img = sct.grab(sct.monitors[0])
+                                                                img = Image.frombytes("RGB", sct_img.size, sct_img.bgra, "raw", "BGRX")
+
+                                                        # Resize strictly to 1280x720 for token saving and text clarity
+                                                        img.thumbnail((1280, 720), Image.Resampling.LANCZOS)
+
                                                         # 1. Send function call confirmation
                                                         await session.send_tool_response(
                                                             function_responses=[
                                                                 FunctionResponse(
-                                                                    name=name, id=fc.id, 
+                                                                    name=name, id=fc.id,
                                                                     response={"result": "Screenshot 1280x720 taken. I see your screen. Analyzing..."}
                                                                 )
                                                             ]
@@ -1628,6 +1663,7 @@ Do not use markdown formatting in speech.
                                                         ui_events_queue.put(("log", "✅ 720p image passed to context"))
                                                     except Exception as e:
                                                         ui_events_queue.put(("log", f"❌ Vision error: {e}"))
+
                                                         await session.send_tool_response(
                                                             function_responses=[FunctionResponse(name=name, id=fc.id, response={"result": f"Error: {e}"})]
                                                         )
@@ -1679,8 +1715,7 @@ Do not use markdown formatting in speech.
 
                                                     # Execute actual tool
                                                     result = await execute_tool(TOOLS_MAPPING[name], args, name)
-                                                    ui_events_queue.put(("log", f"🔹 RESULT: {str(result)[:150]}..."))
-
+                                                    ui_events_queue.put(("log", f"🔹 RESULT: {str(result)[:1024]}..."))
                                                     # Logic for special tools
                                                     if name == "search_github_plugins" and isinstance(result, str) and "NO PLUGINS FOUND" not in result:
                                                         plugin_flow_owned = True

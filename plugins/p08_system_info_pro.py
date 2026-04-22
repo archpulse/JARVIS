@@ -32,14 +32,35 @@ def get_detailed_stats():
 def get_top_processes(n: int = 5):
     """Return the top N CPU-consuming processes."""
     try:
-        procs = []
-        for p in psutil.process_iter(['pid', 'name', 'cpu_percent']):
-            procs.append(p.info)
+        import time
+        # Initialize CPU tracking for all processes
+        procs_objs = []
+        for p in psutil.process_iter(['pid', 'name']):
+            try:
+                p.cpu_percent(interval=None)
+                procs_objs.append(p)
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                continue
         
-        procs.sort(key=lambda x: x['cpu_percent'], reverse=True)
-        top_n = procs[:n]
+        # Wait a brief moment to accumulate CPU usage
+        time.sleep(0.2)
         
-        lines = [f"Sir, here are the top {n} processes by CPU usage:"]
+        procs_info = []
+        for p in procs_objs:
+            try:
+                # Get the accumulated CPU percent
+                cpu = p.cpu_percent(interval=None)
+                info = p.info
+                info['cpu_percent'] = cpu
+                procs_info.append(info)
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                continue
+        
+        # Sort by CPU usage
+        procs_info.sort(key=lambda x: x.get('cpu_percent', 0), reverse=True)
+        top_n = procs_info[:n]
+        
+        lines = [f"Sir, here are the top {len(top_n)} processes by CPU usage:"]
         for p in top_n:
             lines.append(f"  - {p['name']} (PID: {p['pid']}): {p['cpu_percent']}%")
         return "\n".join(lines)
