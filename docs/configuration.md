@@ -1,6 +1,7 @@
 # Configuration
 
 J.A.R.V.I.S. now reads the main runtime knobs from environment variables or the local `.env` file.
+Use [`.env.example`](../.env.example) as the starting point for local overrides.
 
 ## Core Paths
 
