@@ -91,7 +91,8 @@ python -m unittest discover -s tests
 - `main.py`: The central intelligence engine (Voice, AI, GUI).
 - `plugins/`: A directory of specialized skills.
 - `utils.py`: System-level helper functions.
-- `translations.py`: Multi-language support and character dialogue.
+- `setup_wizard.py`: First-run setup flow and localized onboarding text.
+- `main.py`: Primary UI translations and assistant dialogue tables.
 
 ## 🤝 Contributing
 J.A.R.V.I.S. is designed to be modular. You can add new capabilities by simply dropping a new Python script into the `plugins/` directory.
