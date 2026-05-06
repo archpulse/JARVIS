@@ -4,10 +4,13 @@ import threading
 import json
 from datetime import datetime
 
+import jarvis_config as cfg
+
 _memory_conn = None
 _memory_lock = threading.Lock()
-AI_DATA_DIR = os.path.expanduser("~/.jarvis/.ai")
-MEMORY_DB = os.path.join(AI_DATA_DIR, "memory.db")
+AI_DATA_DIR = cfg.ai_data_dir()
+MEMORY_DB = cfg.memory_db_file()
+MEMORY_DIGEST_ENABLED = cfg.feature_enabled("memory_digest")
 
 
 def _get_memory_conn():
@@ -221,6 +224,59 @@ def get_memory_stats():
         return f"Memory stats error: {exc}"
 
 
+def _shorten_text(text: str, limit: int = 120) -> str:
+    cleaned = " ".join((text or "").split())
+    return cleaned[:limit] + ("..." if len(cleaned) > limit else "")
+
+
+def get_memory_digest(limit: int = 5):
+    """AI DESCRIPTION: Summarize the newest facts and recent conversation turns."""
+    try:
+        try:
+            limit = int(limit)
+        except (TypeError, ValueError):
+            limit = 5
+        limit = max(1, min(limit, 20))
+
+        with _memory_lock:
+            conn = _get_memory_conn()
+            cursor = conn.cursor()
+            cursor.execute(
+                """SELECT category, key, value, updated_at FROM facts
+                   ORDER BY updated_at DESC LIMIT ?""",
+                (limit,),
+            )
+            facts = cursor.fetchall()
+            cursor.execute(
+                """SELECT role, content, timestamp FROM conversations
+                   ORDER BY id DESC LIMIT ?""",
+                (limit,),
+            )
+            conversations = cursor.fetchall()
+            cursor.execute("SELECT COUNT(*), COALESCE(SUM(LENGTH(value)), 0) FROM facts")
+            total_facts, approx_size_chars = cursor.fetchone()
+
+        lines = [
+            "=== MEMORY DIGEST ===",
+            f"Stored facts: {total_facts}",
+            f"Approx size: {approx_size_chars // 1024}KB",
+        ]
+        if facts:
+            lines.append("Recent facts:")
+            for category, key, value, updated_at in facts:
+                date = (updated_at or "")[:10] or "?"
+                lines.append(
+                    f"  [{category}] {key}: {_shorten_text(value, 90)} ({date})"
+                )
+        if conversations:
+            lines.append("Recent conversation:")
+            for role, content, _timestamp in reversed(conversations):
+                lines.append(f"  [{role}] {_shorten_text(content, 120)}")
+        return "\n".join(lines)
+    except sqlite3.Error as exc:
+        return f"Memory digest error: {exc}"
+
+
 def save_conversation(role: str, content: str):
     """Save a conversation turn to history."""
     try:
@@ -283,5 +339,9 @@ def manage_memory(action: str, category: str = "", key: str = "", value: str = "
 
 def register_plugin():
     tools = [manage_memory]
+    if MEMORY_DIGEST_ENABLED:
+        tools.append(get_memory_digest)
     mapping = {"manage_memory": manage_memory}
+    if MEMORY_DIGEST_ENABLED:
+        mapping["get_memory_digest"] = get_memory_digest
     return tools, mapping

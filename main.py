@@ -19,6 +19,7 @@ except ImportError:
 
 import qdarktheme
 from dotenv import load_dotenv
+import jarvis_config as cfg
 from PyQt6.QtCore import QPointF, QRectF, Qt, QThread, QTimer, QUrl, pyqtSignal
 from PyQt6.QtGui import (
     QBrush,
@@ -117,22 +118,38 @@ def load_dynamic_plugins(plugins_dir="plugins"):
     return dynamic_tools_list, dynamic_tools_mapping
 
 
-MODEL_ID = "gemini-3.1-flash-live-preview"
-API_VERSION = "v1alpha"
-VERSION = "2.0.0"
-AI_DATA_DIR = os.path.expanduser("~/.jarvis/.ai")
-SETTINGS_FILE = os.path.join(AI_DATA_DIR, "settings.json")
-ENV_FILE = os.path.join(AI_DATA_DIR, ".env")
-MEMORY_DB = os.path.join(AI_DATA_DIR, "memory.db")
-PLUGIN_DAILY_LIMIT = 25
+MODEL_ID = cfg.model_id()
+API_VERSION = cfg.api_version()
+VERSION = cfg.version()
+AI_DATA_DIR = cfg.ai_data_dir()
+SETTINGS_FILE = cfg.settings_file()
+ENV_FILE = cfg.env_file()
+MEMORY_DB = cfg.memory_db_file()
+PLUGIN_DAILY_LIMIT = cfg.plugin_daily_limit()
+DEFAULT_CITY = cfg.default_city()
+PLUGIN_RELOAD_INTERVAL_SECONDS = cfg.plugin_reload_interval_seconds()
+ASYNC_TOOL_TIMEOUT_SECONDS = cfg.tool_timeout_seconds()
+SYNC_TOOL_TIMEOUT_SECONDS = cfg.sync_tool_timeout_seconds()
+MEMORY_WARNING_LIMIT_MB = cfg.memory_warning_limit_mb()
+PLUGIN_CONFIRM_DEBOUNCE_SECONDS = cfg.env_float(
+    "JARVIS_PLUGIN_CONFIRM_DEBOUNCE_SECONDS",
+    6.0,
+)
+TOOL_RESULT_PREVIEW_CHARS = cfg.env_int("JARVIS_TOOL_RESULT_PREVIEW_CHARS", 1024)
+MIC_SAMPLE_RATE = cfg.audio_input_rate()
+SPEAKER_SAMPLE_RATE = cfg.audio_output_rate()
+MIC_BUFFER_FRAMES = cfg.audio_input_buffer_frames()
+SPEAKER_BUFFER_FRAMES = cfg.audio_output_buffer_frames()
+SPEAKER_FALLBACK_RATE = max(1, SPEAKER_SAMPLE_RATE // 2)
+MIC_AUDIO_MIME_TYPE = f"audio/pcm;rate={MIC_SAMPLE_RATE}"
 
 os.makedirs(AI_DATA_DIR, exist_ok=True)
 load_dotenv(ENV_FILE)
 CURRENT_API_KEY = os.getenv("GOOGLE_API_KEY")
-
-AUDIO_IN_RATE = 16000
-AUDIO_OUT_RATE = 48000
-CHUNK = 1024
+ 
+AUDIO_IN_RATE = MIC_SAMPLE_RATE
+AUDIO_OUT_RATE = SPEAKER_SAMPLE_RATE
+CHUNK = MIC_BUFFER_FRAMES
 
 # Translations for UI and Settings
 TRANSLATIONS = {
@@ -523,10 +540,10 @@ def audio_process_worker(
             stream = p.open(
                 format=pyaudio.paInt16,
                 channels=1,
-                rate=16000,
+                rate=MIC_SAMPLE_RATE,
                 input=True,
                 input_device_index=device_id,
-                frames_per_buffer=2048,
+                frames_per_buffer=MIC_BUFFER_FRAMES,
             )
             ui_events_queue.put(("log", f"🎤 MIC ACTIVE (Device: {device_id})"))
         except Exception as e:
@@ -541,13 +558,13 @@ def audio_process_worker(
 
             try:
                 # Read microphone ALWAYS to prevent buffer overflow
-                data = stream.read(2048, exception_on_overflow=False)
+                data = stream.read(MIC_BUFFER_FRAMES, exception_on_overflow=False)
 
                 # === ECHO AND DISCONNECT FIX ===
                 if ai_is_speaking:
                     # Replace real sound with zeros (silence)
                     data = b"\x00" * len(data)
-                    audio_np = np.zeros(1024, dtype=np.int16)
+                    audio_np = np.zeros(MIC_BUFFER_FRAMES, dtype=np.int16)
                 else:
                     audio_np = np.frombuffer(data, dtype=np.int16)
 
@@ -593,10 +610,10 @@ def audio_process_worker(
             stream = p.open(
                 format=pyaudio.paInt16,
                 channels=1,
-                rate=48000,
+                rate=SPEAKER_SAMPLE_RATE,
                 output=True,
                 output_device_index=device_id,
-                frames_per_buffer=512,
+                frames_per_buffer=SPEAKER_BUFFER_FRAMES,
             )
             ui_events_queue.put(("log", "🔊 AUDIO OUTPUT ACTIVE (Low Latency)"))
         except ImportError as e:
@@ -607,13 +624,13 @@ def audio_process_worker(
                 stream = p.open(
                     format=pyaudio.paInt16,
                     channels=1,
-                    rate=48000,
+                    rate=SPEAKER_SAMPLE_RATE,
                     output=True,
-                    frames_per_buffer=512,
+                    frames_per_buffer=SPEAKER_BUFFER_FRAMES,
                 )
             except OSError as e:
                 ui_events_queue.put(
-                    ("log", f"❌ Speaker init fallback(48k) error: {e}")
+                    ("log", f"❌ Speaker init fallback({SPEAKER_SAMPLE_RATE} Hz) error: {e}")
                 )
 
         if stream is None:
@@ -621,9 +638,9 @@ def audio_process_worker(
                 stream = p.open(
                     format=pyaudio.paInt16,
                     channels=1,
-                    rate=24000,
+                    rate=SPEAKER_FALLBACK_RATE,
                     output=True,
-                    frames_per_buffer=512,
+                    frames_per_buffer=SPEAKER_BUFFER_FRAMES,
                 )
             except Exception as e:
                 ui_events_queue.put(("log", f"❌ SPEAKER ERROR: {e}"))
@@ -1021,14 +1038,17 @@ def ai_process_worker(
     async def execute_tool(func, args, name):
         if inspect.iscoroutinefunction(func):
             try:
-                # Set a 25-second timeout to allow Arch to update, but kill it if necessary
-                return await asyncio.wait_for(func(**args), timeout=25.0)
+                # Allow long-running async tools to finish, but still cap them.
+                return await asyncio.wait_for(func(**args), timeout=ASYNC_TOOL_TIMEOUT_SECONDS)
             except asyncio.TimeoutError:
-                return f"Error: {name} timed out after 25 seconds."
+                return f"Error: {name} timed out after {ASYNC_TOOL_TIMEOUT_SECONDS:.0f} seconds."
         if name in SAFE_DIRECT_TOOLS:
             return func(**args)
         try:
-            return await asyncio.wait_for(asyncio.to_thread(func, **args), timeout=18)
+            return await asyncio.wait_for(
+                asyncio.to_thread(func, **args),
+                timeout=SYNC_TOOL_TIMEOUT_SECONDS,
+            )
         except asyncio.TimeoutError:
             return "Error: Plugin execution timed out (Thread killed)"
         except Exception as exc:
@@ -1063,7 +1083,7 @@ def ai_process_worker(
             return
 
         client = genai.Client(api_key=api_key, http_options={"api_version": "v1alpha"})
-        actual_city = city if city.strip() else "Ужгород"
+        actual_city = city if city.strip() else DEFAULT_CITY
 
         get_city_time_info_tool = TOOLS_MAPPING.get("get_city_time_info")
         if callable(get_city_time_info_tool):
@@ -1126,11 +1146,23 @@ USER MANDATE: The user has requested that you MUST SEARCH THE WEB (using `manage
 
 PRIORITIZATION: If a specialized tool or plugin exists (like `get_usd_to_uah_rate` or `manage_arch_packages`), you MUST use it instead of generic `manage_web` research. Specialized tools are faster and more reliable.
 
-MANDATORY PLUGIN STRUCTURE: When generating plugins via `generate_and_install_plugin`, you MUST follow this template. Do NOT use `import jarvis` or other non-existent modules.
+MANDATORY PLUGIN STRUCTURE: When generating plugins via `generate_and_install_plugin`, you MUST follow this template and rules to write HIGH-QUALITY plugins:
+1. DO NOT use `import jarvis` or assume internal undocumented modules exist. Rely only on standard libraries or popular third-party ones (`requests`, `bs4`, `psutil`).
+2. ALWAYS use robust error handling (`try...except Exception as e: return f"Error: {{e}}"`) to prevent crashes. Never raise unhandled exceptions.
+3. INCLUDE clear typing for arguments (e.g. `arg1: str = ""`) and a detailed docstring starting with "AI DESCRIPTION:".
+4. NEVER use infinite loops (`while True:`) without a robust `try...except` and a guaranteed `break` condition.
+5. Provide a complete, standalone Python file returning exactly `tools, mapping` from `register_plugin()`.
+
 ```python
-def my_new_tool(arg1: str):
-    \"\"\"AI DESCRIPTION: Describe what it does here.\"\"\"
-    return f"Result: {{arg1}}"
+import requests
+
+def my_new_tool(arg1: str = ""):
+    \"\"\"AI DESCRIPTION: Describe what it does clearly here so the system knows when to invoke it.\"\"\"
+    try:
+        # robust implementation here
+        return f"Result: {{arg1}}"
+    except Exception as e:
+        return f"Error executing my_new_tool: {{str(e)}}"
 
 def register_plugin():
     tools = [my_new_tool]
@@ -1288,7 +1320,7 @@ Do not use markdown formatting in speech.
             while True:
                 back_to_standby = False  # <-- ADD THIS
                 current_time = time.time()
-                if current_time - last_plugin_check > 5.0:
+                if current_time - last_plugin_check > PLUGIN_RELOAD_INTERVAL_SECONDS:
                     try:
                         current_tools = []
                         current_mapping = {}
@@ -1324,7 +1356,7 @@ Do not use markdown formatting in speech.
                             # Correct call per documentation, as you mentioned!
                             await session.send_realtime_input(
                                 audio=genai_types.Blob(
-                                    data=first_data, mime_type="audio/pcm;rate=16000"
+                                    data=first_data, mime_type=MIC_AUDIO_MIME_TYPE
                                 )
                             )
                             first_data = None
@@ -1338,11 +1370,11 @@ Do not use markdown formatting in speech.
 
                                     # Send audio ONLY if AI is not busy with a plugin
                                     if not tool_active:
-                                        await session.send_realtime_input(
-                                            audio=genai_types.Blob(
-                                                data=data, mime_type="audio/pcm;rate=16000"
+                                            await session.send_realtime_input(
+                                                audio=genai_types.Blob(
+                                                    data=data, mime_type=MIC_AUDIO_MIME_TYPE
+                                                )
                                             )
-                                        )
                                 except queue.Empty:
                                     await asyncio.sleep(0.01)
                                 except Exception as e:
@@ -1404,7 +1436,7 @@ Do not use markdown formatting in speech.
                                                     time.time()
                                                     - last_local_plugin_search
                                                 )
-                                                > 6.0
+                                                > PLUGIN_CONFIRM_DEBOUNCE_SECONDS
                                             )
                                         ):
                                             plugin_flow_owned = True
@@ -1715,7 +1747,7 @@ Do not use markdown formatting in speech.
 
                                                     # Execute actual tool
                                                     result = await execute_tool(TOOLS_MAPPING[name], args, name)
-                                                    ui_events_queue.put(("log", f"🔹 RESULT: {str(result)[:1024]}..."))
+                                                    ui_events_queue.put(("log", f"🔹 RESULT: {str(result)[:TOOL_RESULT_PREVIEW_CHARS]}..."))
                                                     # Logic for special tools
                                                     if name == "search_github_plugins" and isinstance(result, str) and "NO PLUGINS FOUND" not in result:
                                                         plugin_flow_owned = True
@@ -3407,13 +3439,16 @@ def start_gui():
     # Check memory size and show cleanup dialog if needed
     try:
         # Load settings to check memory warning preferences
-        memory_warning_limit = 500  # Default 500 MB
+        memory_warning_limit = MEMORY_WARNING_LIMIT_MB
         memory_warning_disabled = False
 
         if os.path.exists(SETTINGS_FILE):
             with open(SETTINGS_FILE, "r", encoding="utf-8") as f:
                 settings_data = json.load(f)
-                memory_warning_limit = settings_data.get("memory_warning_limit", 500)
+                memory_warning_limit = settings_data.get(
+                    "memory_warning_limit",
+                    MEMORY_WARNING_LIMIT_MB,
+                )
                 memory_warning_disabled = settings_data.get(
                     "memory_warning_disabled", False
                 )

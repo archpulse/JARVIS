@@ -9,18 +9,24 @@ from datetime import date
 
 import requests
 from google import genai
+import jarvis_config as cfg
 
-MAX_PLUGIN_SIZE = 20_000
-REQUEST_TIMEOUT = 4
-MAX_SEARCH_RESULTS = 3
+MAX_PLUGIN_SIZE = cfg.env_int("JARVIS_PLUGIN_MAX_SIZE_BYTES", 20_000)
+REQUEST_TIMEOUT = cfg.env_float("JARVIS_PLUGIN_REQUEST_TIMEOUT_SECONDS", 4.0)
+MAX_SEARCH_RESULTS = cfg.env_int("JARVIS_PLUGIN_MAX_SEARCH_RESULTS", 3)
 AI_SECURITY_MODELS = [
-    "gemini-3.1-flash-lite-preview",
-    "gemini-2.5-flash-lite",
-    "gemini-2.5-flash-lite-preview-09-2025",
-    "gemini-2.5-flash",
+    item.strip()
+    for item in cfg.env_str(
+        "JARVIS_AI_SECURITY_MODELS",
+        "gemini-3.1-flash-lite-preview,gemini-2.5-flash-lite,gemini-2.5-flash-lite-preview-09-2025,gemini-2.5-flash",
+    ).split(",")
+    if item.strip()
 ]
-MAX_DAILY_PLUGIN_REVIEWS = 25
-LIMITS_FILE = os.path.join(os.path.dirname(__file__), ".plugin_review_limits.json")
+MAX_DAILY_PLUGIN_REVIEWS = cfg.max_daily_plugin_reviews()
+LIMITS_FILE = cfg.env_str(
+    "JARVIS_PLUGIN_REVIEW_LIMITS_FILE",
+    os.path.join(os.path.dirname(__file__), ".plugin_review_limits.json"),
+)
 FORBIDDEN_IMPORT_ROOTS = {
     "subprocess",
     "shutil",
@@ -64,7 +70,7 @@ _DANGEROUS_ATTRS = frozenset({
 
 # Known "allow any" module names to watch
 _ALLOW_ANY_ATTRS = frozenset({"os", "subprocess", "shutil", "sys", "builtins"})
-CONFIRM_TTL_SECONDS = 180
+CONFIRM_TTL_SECONDS = cfg.plugin_confirm_ttl_seconds()
 _CONFIRMED_PULLS = {}
 _PENDING_PLUGIN_CHOICES = []
 _AI_REVIEW_CACHE = {}

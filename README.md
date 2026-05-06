@@ -24,6 +24,7 @@ J.A.R.V.I.S. comes pre-equipped with specialized plugins to manage your system n
 - **Autonomous Coding**: Can generate and install its own plugins using the `self_coder` module.
 - **Memory**: Remembers facts about you and your preferences across sessions.
 - **System Control**: Native app launching, media controls, volume management, and custom modes (Gaming, Dinner, etc.).
+- **Optional Tools**: Feature-flagged memory digest, system snapshot, and city briefing tools.
 
 ## 🚀 Installation
 
@@ -53,6 +54,38 @@ J.A.R.V.I.S. comes pre-equipped with specialized plugins to manage your system n
    python main.py
    ```
    *Follow the Setup Wizard on first launch to configure your Gemini API Key.*
+
+## ⚙ Configuration
+
+Most runtime values are now environment-backed instead of hardcoded. See [docs/configuration.md](docs/configuration.md) for the full list of supported variables and feature flags.
+
+The new optional tools are controlled by these flags:
+
+- `JARVIS_FEATURE_MEMORY_DIGEST`
+- `JARVIS_FEATURE_SYSTEM_SNAPSHOT`
+- `JARVIS_FEATURE_CITY_BRIEFING`
+
+Common overrides include:
+
+- `JARVIS_AI_DATA_DIR`
+- `JARVIS_DEFAULT_CITY`
+- `JARVIS_MODEL_ID`
+- `JARVIS_TOOL_TIMEOUT_SECONDS`
+- `JARVIS_WEB_RESEARCH_CACHE_ENABLED`
+
+## 🧪 Tests
+
+Run the local test suite with:
+
+```bash
+python -m unittest discover -s tests
+```
+
+## 🧰 Development Notes
+
+- The assistant loads plugins from `plugins/` dynamically at runtime.
+- The memory store uses SQLite in the configured AI data directory.
+- Web research and news plugins use small caches to reduce repeated network work.
 
 ## 🧱 Project Structure
 - `main.py`: The central intelligence engine (Voice, AI, GUI).

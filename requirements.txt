@@ -12,3 +12,4 @@ PyAutoGUI==0.9.54
 pyscreenshot==3.1
 mss
 openwakeword==0.4.0
+beautifulsoup4==4.13.4

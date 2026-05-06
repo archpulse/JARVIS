@@ -2,9 +2,24 @@ import datetime
 import webbrowser
 import psutil
 import requests
+import time
+
+import jarvis_config as cfg
 from utils import command_exists, run_command
 
 _http_session = requests.Session()
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:
+    ZoneInfo = None
+
+CITY_BRIEFING_ENABLED = cfg.feature_enabled("city_briefing")
+CITY_TIME_CACHE_TTL_SECONDS = cfg.city_time_cache_ttl_seconds()
+CITY_TIME_HTTP_TIMEOUT_SECONDS = cfg.env_float(
+    "JARVIS_CITY_TIME_HTTP_TIMEOUT_SECONDS",
+    5.0,
+)
+_CITY_TIME_CACHE = {}
 
 
 def open_website(url: str):
@@ -140,7 +155,7 @@ def set_volume(action: str):
 def get_city_time_info(city: str):
     """Return city-local hour and day period."""
     city_tz_map = {
-        "kyiv": "Europe/Kiev",
+        "kyiv": "Europe/Kyiv",
         "kiev": "Europe/Kiev",
         "london": "Europe/London",
         "berlin": "Europe/Berlin",
@@ -155,14 +170,29 @@ def get_city_time_info(city: str):
         "dubai": "Asia/Dubai",
     }
 
-    zone = city_tz_map.get((city or "").strip().lower())
-    hour = datetime.datetime.now().hour
+    city_key = (city or "").strip().lower()
+    cached = _CITY_TIME_CACHE.get(city_key)
+    now = time.time()
+    if cached and now - cached["ts"] < CITY_TIME_CACHE_TTL_SECONDS:
+        return dict(cached["value"])
 
-    if zone:
+    zone = city_tz_map.get(city_key)
+    hour = datetime.datetime.now().hour
+    source = "local"
+
+    if zone and ZoneInfo is not None:
+        try:
+            hour = datetime.datetime.now(ZoneInfo(zone)).hour
+        except Exception:
+            source = "network"
+    elif zone:
+        source = "network"
+
+    if zone and source == "network":
         try:
             response = _http_session.get(
                 f"https://timeapi.io/api/time/current/zone?timeZone={zone}",
-                timeout=5,
+                timeout=CITY_TIME_HTTP_TIMEOUT_SECONDS,
             )
             if response.status_code == 200:
                 hour = int(response.json().get("hour", hour))
@@ -178,12 +208,39 @@ def get_city_time_info(city: str):
     else:
         period = "night"
 
-    return {
+    result = {
         "hour": hour,
         "period": period,
         "formatted_time": f"{hour:02d}:00",
         "city": city,
+        "source": source,
     }
+    _CITY_TIME_CACHE[city_key] = {"ts": now, "value": result}
+    return result
+
+
+def get_city_briefing(city: str):
+    """AI DESCRIPTION: Return a conversational city-time briefing with cached lookup."""
+    try:
+        info = get_city_time_info(city)
+        city_name = (city or "").strip()
+        if not city_name:
+            return "City name is required for a briefing."
+
+        greeting_map = {
+            "morning": "Good morning",
+            "day": "Good day",
+            "evening": "Good evening",
+            "night": "Good night",
+        }
+        greeting = greeting_map.get(info["period"], "Good day")
+        source_note = "local timezone data" if info.get("source") == "local" else "time service data"
+        return (
+            f"{greeting}, Sir. {city_name} is currently around {info['formatted_time']} "
+            f"({info['period']}). I used {source_note}."
+        )
+    except Exception as e:
+        return f"Error generating city briefing: {e}"
 
 
 def enable_wwd_mode():
@@ -221,7 +278,7 @@ def turn_off_screen():
 
 
 def manage_system(action: str, url: str = "", app_name: str = "", volume_direction: str = "", city: str = ""):
-    """Manage system functions. Actions: 'open_website' (needs url), 'run_app' (needs app_name), 'get_system_stats', 'media_play_pause', 'media_next', 'media_prev', 'set_volume' (needs volume_direction 'up' or 'down'), 'get_city_time_info' (needs city), 'standby_mode', 'lock_workstation', 'turn_off_screen', 'enable_wwd_mode'."""
+    """Manage system functions. Actions: 'open_website' (needs url), 'run_app' (needs app_name), 'get_system_stats', 'media_play_pause', 'media_next', 'media_prev', 'set_volume' (needs volume_direction 'up' or 'down'), 'get_city_time_info' (needs city), 'get_city_briefing' (needs city), 'standby_mode', 'lock_workstation', 'turn_off_screen', 'enable_wwd_mode'."""
     if action == "open_website": return open_website(url)
     elif action == "run_app": return run_app(app_name)
     elif action == "get_system_stats": return get_system_stats()
@@ -230,6 +287,8 @@ def manage_system(action: str, url: str = "", app_name: str = "", volume_directi
     elif action == "media_prev": return media_prev()
     elif action == "set_volume": return set_volume(volume_direction)
     elif action == "get_city_time_info": return get_city_time_info(city)
+    elif action == "get_city_briefing":
+        return get_city_briefing(city) if CITY_BRIEFING_ENABLED else "City briefing feature is disabled."
     elif action == "standby_mode": return enable_wwd_mode()
     elif action == "lock_workstation": return lock_workstation()
     elif action == "turn_off_screen": return turn_off_screen()
@@ -238,5 +297,7 @@ def manage_system(action: str, url: str = "", app_name: str = "", volume_directi
 
 def register_plugin():
     tools = [manage_system]
+    if CITY_BRIEFING_ENABLED:
+        tools.append(get_city_briefing)
     mapping = {t.__name__: t for t in tools}
     return tools, mapping

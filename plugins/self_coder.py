@@ -81,9 +81,16 @@ def generate_and_install_plugin(filename: str, code: str, description: str = "")
     Generates a new Jarvis plugin, validates it, and saves it to the plugins/
     directory for automatic hot-reload activation.
 
+    CRITICAL RULES FOR GENERATING CODE:
+    1. Only use standard libraries or safe third-party libraries (e.g. requests, bs4).
+    2. MUST include a `register_plugin()` function returning `tools, mapping`.
+    3. MUST use robust error handling (`try...except Exception as e`) in every tool function. Do not raise unhandled exceptions.
+    4. Each tool function MUST have a descriptive docstring starting with "AI DESCRIPTION:".
+    5. Avoid infinite loops. Any loop must have a safe exit condition and try/except block.
+
     Args:
         filename:   Target filename in plugins/ (e.g. "15_pinger.py")
-        code:       Full Python source of the plugin
+        code:       Full Python source of the plugin. MUST be syntactically correct and fully implemented.
         description: Short human-readable description (used in confirmation)
     """
     # 1. Sanitise filename — prevent path traversal

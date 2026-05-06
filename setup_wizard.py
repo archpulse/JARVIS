@@ -2,6 +2,7 @@ import json
 import os
 
 import qdarktheme
+import jarvis_config as cfg
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (
@@ -14,10 +15,10 @@ from PyQt6.QtWidgets import (
     QWizardPage,
 )
 
-AI_DATA_DIR = os.path.expanduser("~/.jarvis/.ai")
-ENV_FILE = os.path.join(AI_DATA_DIR, ".env")
-SETTINGS_FILE = os.path.join(AI_DATA_DIR, "settings.json")
-PLUGIN_DAILY_LIMIT = 25
+AI_DATA_DIR = cfg.ai_data_dir()
+ENV_FILE = cfg.env_file()
+SETTINGS_FILE = cfg.settings_file()
+PLUGIN_DAILY_LIMIT = cfg.plugin_daily_limit()
 
 WIZARD_TRANSLATIONS = {
     "EN": {

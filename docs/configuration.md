@@ -1,0 +1,60 @@
+# Configuration
+
+J.A.R.V.I.S. now reads the main runtime knobs from environment variables or the local `.env` file.
+
+## Core Paths
+
+- `JARVIS_AI_DATA_DIR` controls the data directory used for settings, `.env`, and memory storage.
+- `JARVIS_SETTINGS_FILE` overrides the settings JSON path.
+- `JARVIS_ENV_FILE` overrides the local environment file path.
+- `JARVIS_MEMORY_DB` overrides the SQLite memory database path.
+
+## Runtime Defaults
+
+- `JARVIS_MODEL_ID`
+- `JARVIS_API_VERSION`
+- `JARVIS_VERSION`
+- `JARVIS_PLUGIN_DAILY_LIMIT`
+- `JARVIS_AUDIO_IN_RATE`
+- `JARVIS_AUDIO_OUT_RATE`
+- `JARVIS_AUDIO_IN_BUFFER_FRAMES`
+- `JARVIS_AUDIO_OUT_BUFFER_FRAMES`
+- `JARVIS_TOOL_TIMEOUT_SECONDS`
+- `JARVIS_SYNC_TOOL_TIMEOUT_SECONDS`
+- `JARVIS_PLUGIN_RELOAD_INTERVAL_SECONDS`
+- `JARVIS_MEMORY_WARNING_LIMIT_MB`
+- `JARVIS_DEFAULT_CITY`
+
+## Performance Knobs
+
+- `JARVIS_WEB_RESEARCH_CACHE_ENABLED`
+- `JARVIS_WEB_RESEARCH_CACHE_TTL_SECONDS`
+- `JARVIS_WEB_RESEARCH_CACHE_SIZE`
+- `JARVIS_DDG_RESULT_LIMIT`
+- `JARVIS_GOOGLE_RESULT_LIMIT`
+- `JARVIS_WEB_RESEARCH_DISPLAY_LIMIT`
+- `JARVIS_WEB_RESEARCH_SCRAPE_LIMIT`
+- `JARVIS_IT_NEWS_RESULT_LIMIT`
+- `JARVIS_IT_NEWS_SCRAPE_LIMIT`
+- `JARVIS_IT_NEWS_TIMEOUT_SECONDS`
+- `JARVIS_TOP_PROCESS_CACHE_TTL_SECONDS`
+- `JARVIS_CITY_TIME_CACHE_TTL_SECONDS`
+- `JARVIS_CITY_TIME_HTTP_TIMEOUT_SECONDS`
+- `JARVIS_PLUGIN_CONFIRM_DEBOUNCE_SECONDS`
+- `JARVIS_TOOL_RESULT_PREVIEW_CHARS`
+
+## Feature Flags
+
+Set these to `1`, `true`, `yes`, or `on` to enable the extra tools:
+
+- `JARVIS_FEATURE_MEMORY_DIGEST`
+- `JARVIS_FEATURE_SYSTEM_SNAPSHOT`
+- `JARVIS_FEATURE_CITY_BRIEFING`
+
+## Testing
+
+Run the local test suite with:
+
+```bash
+python -m unittest discover -s tests
+```
