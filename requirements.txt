@@ -4,7 +4,8 @@ numpy==2.4.3
 google-genai==1.66.0
 python-dotenv==1.2.2
 psutil==7.2.2
-duckduckgo_search==8.1.1
+ddgs==9.14.2
+googlesearch-python==1.2.5
 pillow==12.1.1
 pyqtdarktheme==0.1.7
 requests==2.32.5

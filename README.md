@@ -4,6 +4,7 @@ Open-source Arch Linux copilot for power users, maintainers, and people who want
 
 ![Python](https://img.shields.io/badge/python-3.10+-blue.svg)
 ![Arch Linux](https://img.shields.io/badge/OS-Arch%20Linux-blue)
+![Version](https://img.shields.io/badge/version-1.2.2-blue.svg)
 ![Tests](https://img.shields.io/badge/tests-unittest-brightgreen)
 
 ## What it is

@@ -21,12 +21,43 @@ def manage_arch_packages(action: str, query: str = ""):
             return "\n".join(lines) + ("\n..." if len(result.stdout.splitlines()) > 15 else "")
         return f"Search failed: {result.stderr}"
 
+    def get_terminal_cmd(cmd_list):
+        for term in ["kitty", "alacritty", "konsole", "gnome-terminal", "xfce4-terminal", "xterm"]:
+            if command_exists(term):
+                if term in ["kitty", "alacritty"]:
+                    return [term, "-e"] + cmd_list
+                if term == "konsole":
+                    return [term, "-e"] + cmd_list
+                if term == "gnome-terminal":
+                    return [term, "--"] + cmd_list
+                if term == "xfce4-terminal":
+                    return [term, "-e", " ".join(cmd_list)]
+                if term == "xterm":
+                    return [term, "-e"] + cmd_list
+        return None
+
     if action == "install":
         if not query: return "Package name is required."
-        return f"To install, run: {manager} -S {query}"
+        full_cmd = [manager, "-S", query]
+        term_cmd = get_terminal_cmd(full_cmd)
+        if term_cmd:
+            try:
+                subprocess.Popen(term_cmd, start_new_session=True)
+                return f"Very well Sir, I've opened a terminal to install {query} via {manager}."
+            except Exception as e:
+                return f"Failed to open terminal: {e}. Command: {' '.join(full_cmd)}"
+        return f"No terminal emulator found. Please run manually: {' '.join(full_cmd)}"
 
     if action == "update":
-        return f"To update your system, run: {manager} -Syu"
+        full_cmd = [manager, "-Syu"]
+        term_cmd = get_terminal_cmd(full_cmd)
+        if term_cmd:
+            try:
+                subprocess.Popen(term_cmd, start_new_session=True)
+                return f"Certainly Sir, launching system update in a new terminal."
+            except Exception as e:
+                return f"Failed to open terminal: {e}. Command: {' '.join(full_cmd)}"
+        return f"No terminal emulator found. Please run manually: {' '.join(full_cmd)}"
 
     if action == "health":
         health_report = []
