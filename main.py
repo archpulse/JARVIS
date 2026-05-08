@@ -3220,9 +3220,6 @@ def start_gui():
             self.setGeometry(100, 100, 1280, 720)
             self.show()
 
-
-
-
             self.current_lang = "EN"
             self.selected_voice = "Charon"
             self.dev_mode = False

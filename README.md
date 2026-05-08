@@ -7,130 +7,66 @@ Open-source Arch Linux copilot for power users, maintainers, and people who want
 ![Version](https://img.shields.io/badge/version-1.2.2-blue.svg)
 ![Tests](https://img.shields.io/badge/tests-unittest-brightgreen)
 
-## What it is
+## Overview
 
-J.A.R.V.I.S. is a local, plugin-based voice assistant for Arch Linux. It combines:
+J.A.R.V.I.S. is a local, plugin-based voice assistant tailored for Arch Linux environments. It brings together system automation, web research, persistent memory, safe plugin management, and voice-first control into a unified, modular ecosystem.
 
-- system automation
-- web research
-- persistent memory
-- safe plugin installation
-- voice-first control
+Designed as a practical Linux copilot rather than a generic chat toy, J.A.R.V.I.S. aims to streamline complex workflows and provide immediate access to system information and web resources directly from your desktop.
 
-The project is built for people who want a practical Linux copilot, not a generic chat toy.
+## Features
 
-## Why this repo exists
-
-This project focuses on one narrow pain point: making Linux workflows faster without hiding what is happening.
-
-- You can ask for system health instead of opening five terminals.
-- You can search Arch Wiki and the web from one assistant.
-- You can load plugins dynamically without editing the core app.
-- You can keep feature flags off until you want them.
-
-That combination is what makes the project useful to developers who star repositories and come back later.
-
-## What it can do
-
-- Check system health, top processes, memory, and city-aware briefings
-- Search Arch Wiki, DuckDuckGo, Wikipedia, and IT news
-- Remember facts and conversation history in SQLite
-- Detect screen-analysis requests and capture the screen when asked
-- Install vetted plugins through a confirmation flow
-- Expose optional tools through feature flags
-
-## 3-minute demo
-
-If you want to show the project publicly, use this sequence:
-
-1. Launch the app and complete the setup wizard.
-2. Press `INIT`.
-3. Say:
-   - `Check system health`
-   - `Search Arch Wiki for pipewire latency`
-   - `Remember that I prefer concise answers`
-   - `What is on my screen?`
-   - `Search for plugins related to Arch system monitoring`
-
-This gives viewers the core value in under three minutes:
-
-- local desktop automation
-- search
-- memory
-- vision
-- extensibility
+- **System Automation & Monitoring**: Instantly check system health, top processes, memory usage, and receive city-aware daily briefings.
+- **Integrated Research**: Search the Arch Wiki, DuckDuckGo, Wikipedia, and IT news directly through voice or text commands.
+- **Persistent Memory**: Remembers facts, preferences, and conversation history locally using SQLite.
+- **Screen Awareness**: Detects screen-analysis requests and can capture and analyze your screen context when asked.
+- **Extensible Architecture**: Safely install and load vetted plugins dynamically without modifying the core application.
+- **Feature Flags**: Easily toggle optional capabilities on or off as needed.
 
 ## Quick Start
 
-1. Clone the repository:
+1. **Clone the repository**:
    ```bash
    git clone https://github.com/archpulse/jarvis.git
    cd jarvis
    ```
 
-2. Create a virtual environment and install dependencies:
+2. **Create a virtual environment and install dependencies**:
    ```bash
    python -m venv .venv
    source .venv/bin/activate
    pip install -r requirements.txt
    ```
 
-3. Copy the sample environment:
+3. **Configure your environment**:
    ```bash
    mkdir -p ~/.jarvis/.ai
    cp .env.example ~/.jarvis/.ai/.env
    ```
 
-4. Start the app:
+4. **Start the application**:
    ```bash
    python main.py
    ```
 
-5. Follow the first-run wizard, add your Gemini API key, then click `INIT`.
+5. **Setup**: Follow the first-run wizard, input your Gemini API key, and click `INIT` to initialize the system.
 
-## Feature Flags
+## Configuration
 
-These optional tools can be enabled without changing code:
-
-- `JARVIS_FEATURE_MEMORY_DIGEST`
-- `JARVIS_FEATURE_SYSTEM_SNAPSHOT`
-- `JARVIS_FEATURE_CITY_BRIEFING`
-
-Useful overrides:
-
-- `JARVIS_AI_DATA_DIR`
-- `JARVIS_DEFAULT_CITY`
-- `JARVIS_MODEL_ID`
-- `JARVIS_TOOL_TIMEOUT_SECONDS`
-- `JARVIS_WEB_RESEARCH_CACHE_ENABLED`
-
-See [docs/configuration.md](docs/configuration.md) for the full list.
-
-## Why developers may star it
-
-People usually save projects when they are:
-
-- immediately understandable
-- easy to try
-- obviously useful
-- well documented
-- small enough to inspect
-
-This repo tries to satisfy that by keeping the assistant modular, test-covered, and configurable.
+You can customize J.A.R.V.I.S. behavior using feature flags and environment variables. For a full list of available options, including memory digest, system snapshot, and city briefing features, please see [docs/configuration.md](docs/configuration.md).
 
 ## Project Structure
 
-- `main.py`: voice loop, UI, assistant orchestration
-- `setup_wizard.py`: first-run setup and onboarding
-- `plugins/`: feature modules loaded at runtime
-- `utils.py`: shared helpers
-- `jarvis_config.py`: env/config defaults and feature flags
-- `docs/`: configuration and demo docs
-- `tests/`: unit tests for config and feature flags
+- `main.py`: Core voice loop, UI, and assistant orchestration.
+- `setup_wizard.py`: First-run setup and onboarding flow.
+- `plugins/`: Directory for feature modules loaded at runtime.
+- `utils.py`: Shared utility functions and helpers.
+- `jarvis_config.py`: Environment configuration, defaults, and feature flags.
+- `docs/`: Configuration and documentation.
+- `tests/`: Unit test suite.
 
-## Development
+## Development & Testing
 
-Run the test suite:
+To run the local test suite:
 
 ```bash
 python -m unittest discover -s tests
@@ -138,18 +74,17 @@ python -m unittest discover -s tests
 
 ## Contributing
 
-If you want to add a plugin, keep it:
+We welcome contributions! If you want to add a new plugin or feature, please ensure it is:
+- Focused and small in scope
+- Well documented
+- Safe by default
+- Testable without requiring the full GUI
 
-- small
-- well documented
-- safe by default
-- testable without the full GUI
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the preferred contribution flow.
+Review our [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ## License
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE).
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
-Created for people who actually use Linux.
+*Created for people who actually use Linux.*
